@@ -25,9 +25,17 @@ class BooksApp extends React.Component {
     // update shelf info for single book
     updateBook = (book, event) => {
         const shelf = event.target.value;
-        BooksAPI.update(book, shelf).then((result) => {
-            this.getAllBooks();
-        })
+        if (book.shelf !== shelf) {
+            BooksAPI.update(book, shelf).then(() => {
+                book.shelf = shelf;
+
+                // Filter out the book and append it to the end of the list
+                // so it appears at the end of whatever shelf it was added to.
+                this.setState(state => ({
+                    books: state.books.filter(b => b.id !== book.id).concat([book])
+                }))
+            })
+        }
     };
 
     render() {
@@ -54,7 +62,7 @@ class BooksApp extends React.Component {
                         <BookShelf books={readBooks} title="Read" updateBook={this.updateBook}/>
 
                         <div className="open-search">
-                            <Link to="/search" className="open-search" onClick={() => this.setState({books:[]})}>
+                            <Link to="/search" className="open-search">
                                 Add a book
                             </Link>
                         </div>
